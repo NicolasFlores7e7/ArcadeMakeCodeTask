@@ -10,36 +10,36 @@ namespace SpriteKind {
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     projectile = sprites.createProjectileFromSprite(img`
-        44444...........
-        ...44444........
-        ....44444.......
-        ......44444.....
-        .......44444....
-        ........44444...
-        ........44444...
-        .........44444..
-        ..........44444.
-        ..........44444.
-        ..........44444.
-        ...........44444
-        ...........44444
-        ...........44444
-        ...........44444
-        ...........44444
-        ...........44444
-        ..........44444.
-        ..........44444.
-        ..........44444.
-        .........44444..
-        ........44444...
-        ........44444...
-        .......44444....
-        ......44444.....
-        ....44444.......
-        ...44444........
-        44444...........
+        fffff...........
+        ...dffff........
+        ....ddfff.......
+        ......dffff.....
+        .......dffff....
+        ........fffff...
+        ........dffff...
+        .........dffff..
+        ..........fffff.
+        ..........fffff.
+        ..........dffff.
+        ...........fffff
+        ...........dffff
+        ...........dffff
+        ...........dffff
+        ...........dffff
+        ...........fffff
+        ..........dffff.
+        ..........dffff.
+        ..........fffff.
+        .........dffff..
+        ........dffff...
+        ........fffff...
+        .......dffff....
+        ......dffff.....
+        ....ddfff.......
+        ...dffff........
+        fffff...........
         `, reaper, 200, 0)
-    projectile.setScale(2, ScaleAnchor.Middle)
+    projectile.setScale(2.2, ScaleAnchor.Middle)
     animation.setAction(reaper, ActionKind.Attacking)
     pause(150)
     sprites.destroy(projectile)
@@ -72,7 +72,6 @@ function PlayerAnimations () {
     animation.setAction(reaper, ActionKind.Idle)
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
-    info.changeScoreBy(1)
     sprites.destroy(otherSprite)
 })
 function PlayerController () {
@@ -127,7 +126,37 @@ function GhostController () {
     ghost.follow(reaper)
     GhostAnimations()
 }
+function CountEnemiesLeft () {
+    enemiesLeftText = textsprite.create("Test")
+    enemiesLeftText.setBorder(1, 0, 1)
+    enemiesLeftText.setOutline(1, 15)
+    enemiesLeftText.setIcon(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . 4 . . e f . . . . . . . 
+        . . . . . . 4 f e e . . . . . . 
+        . . . . . . f f f f . . . . . . 
+        . . . . 1 . 4 f e e . . . . . . 
+        . . . . 1 e e e e e e . . . . . 
+        . . . . . e f e e e e . . . . . 
+        . . . . . f e f f e f . . . . . 
+        . . . . . e e e f f . . . . . . 
+        . . . . . e e e 7 f . . . . . . 
+        . . . . . . f e . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `)
+    enemiesLeftText.setFlag(SpriteFlag.RelativeToCamera, true)
+    enemiesLeftText.setPosition(130, 11)
+}
+function RefreshTextEnemiesCount () {
+    enemiesLeftText.setText(":" + enemiesLeftInt)
+}
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    enemiesLeftInt += -1
+    RefreshTextEnemiesCount()
     sprites.destroy(otherSprite)
 })
 function GhostSpawner () {
@@ -150,15 +179,19 @@ function GhostSpawner () {
             . . . . . . 4 4 4 4 . . . . . . 
             . . . . . . . . . . 3 . . . . . 
             `, SpriteKind.ghostSpawner)
+        enemiesLeftInt += 1
         tiles.placeOnTile(ghostSpawnPoint, value2)
         tiles.setTileAt(value2, sprites.dungeon.floorLight5)
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    info.changeLifeBy(-1)
+    enemiesLeftInt += -1
+    RefreshTextEnemiesCount()
     sprites.destroy(otherSprite)
 })
 let ghostSpawnPoint: Sprite = null
+let enemiesLeftInt = 0
+let enemiesLeftText: TextSprite = null
 let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
 let diamondSprite: Sprite = null
@@ -167,13 +200,14 @@ let attacking: animation.Animation = null
 let idling: animation.Animation = null
 let projectile: Sprite = null
 let reaper: Sprite = null
-info.setLife(3)
 scene.setBackgroundColor(1)
 tiles.setCurrentTilemap(tilemap`level3`)
 PlayerController()
 scene.cameraFollowSprite(reaper)
 createCoins()
 GhostSpawner()
+CountEnemiesLeft()
+RefreshTextEnemiesCount()
 game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
