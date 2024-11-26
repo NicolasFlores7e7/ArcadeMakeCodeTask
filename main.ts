@@ -10,25 +10,8 @@ namespace SpriteKind {
     export const Portal = SpriteKind.create()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    projectile = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, reaper, 200, 0)
-    projectile.setScale(2.2, ScaleAnchor.Middle)
+    projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
+    projectile.setScale(0.8, ScaleAnchor.Middle)
     animation.setAction(reaper, ActionKind.Attacking)
     pause(150)
     sprites.destroy(projectile)
