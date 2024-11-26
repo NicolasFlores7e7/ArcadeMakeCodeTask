@@ -73,6 +73,7 @@ function PlayerAnimations () {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
     diamondsCounterInt += 1
+    reaper.sayText("Diamantito!", 500, false)
     RefreshText()
     sprites.destroy(otherSprite)
 })
@@ -115,6 +116,7 @@ function GhostAnimations () {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.ghostSpawner, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
+    reaper.sayText("FANTASMAA!!!!", 500, false)
     GhostController()
 })
 function ScreenText () {
@@ -394,5 +396,10 @@ game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
         reaper.image.flipX()
+    }
+})
+game.onUpdateInterval(100, function () {
+    if (lifeInt == 0) {
+        game.gameOver(false)
     }
 })
