@@ -72,8 +72,13 @@ function PlayerAnimations () {
     animation.setAction(reaper, ActionKind.Idle)
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
+    diamondsCounterInt += 1
+    DiamondCounterRefreshText()
     sprites.destroy(otherSprite)
 })
+function DiamondCounterRefreshText () {
+    diamondsText.setText(": " + diamondsCounterInt)
+}
 function PlayerController () {
     reaper = sprites.create(assets.image`ReaperIdle1`, SpriteKind.Player)
     reaper.setPosition(24, 170)
@@ -151,8 +156,33 @@ function CountEnemiesLeft () {
     enemiesLeftText.setFlag(SpriteFlag.RelativeToCamera, true)
     enemiesLeftText.setPosition(130, 11)
 }
+function DiamondCounter () {
+    diamondsText = textsprite.create("Test")
+    diamondsText.setBorder(1, 0, 1)
+    diamondsText.setOutline(1, 15)
+    diamondsText.setIcon(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . f . . . . . . . 
+        . . . . . . . e 3 . . . . . . . 
+        . . . . . . . e e f . . . . . . 
+        . . . . . . e e e 3 . . . . . . 
+        . . . . . . e e e 3 f . . . . . 
+        . . . . . e 2 e e 3 3 . . . . . 
+        . . . . . 2 2 e e f f . . . . . 
+        . . . . . . e 2 e f f . . . . . 
+        . . . . . . e 2 e e . . . . . . 
+        . . . . . . . 2 e f . . . . . . 
+        . . . . . . . 2 e . . . . . . . 
+        . . . . . . . . f . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `)
+    diamondsText.setFlag(SpriteFlag.RelativeToCamera, true)
+    diamondsText.setPosition(80, 11)
+}
 function RefreshTextEnemiesCount () {
-    enemiesLeftText.setText(":" + enemiesLeftInt)
+    enemiesLeftText.setText(": " + enemiesLeftInt)
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
@@ -196,6 +226,8 @@ let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
 let diamondSprite: Sprite = null
 let diamondIdle: animation.Animation = null
+let diamondsText: TextSprite = null
+let diamondsCounterInt = 0
 let attacking: animation.Animation = null
 let idling: animation.Animation = null
 let projectile: Sprite = null
@@ -208,6 +240,8 @@ createCoins()
 GhostSpawner()
 CountEnemiesLeft()
 RefreshTextEnemiesCount()
+DiamondCounter()
+DiamondCounterRefreshText()
 game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
