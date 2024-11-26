@@ -115,6 +115,35 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.ghostSpawner, function (sprite, 
     sprites.destroy(otherSprite)
     GhostController()
 })
+function LifeText () {
+    lifeText = textsprite.create("Test")
+    lifeText.setBorder(1, 0, 1)
+    lifeText.setOutline(1, 15)
+    lifeText.setIcon(img`
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        .......22...22......
+        ......2322.2222.....
+        ......232222222.....
+        ......222222222.....
+        .......22222b2......
+        ........222b2.......
+        .........222........
+        ..........2.........
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        ....................
+        `)
+    lifeText.setFlag(SpriteFlag.RelativeToCamera, true)
+    lifeText.setPosition(30, 11)
+}
 function createCoins () {
     for (let value of tiles.getTilesByType(assets.tile`myTile`)) {
         diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
@@ -155,6 +184,9 @@ function CountEnemiesLeft () {
         `)
     enemiesLeftText.setFlag(SpriteFlag.RelativeToCamera, true)
     enemiesLeftText.setPosition(130, 11)
+}
+function LifeTextRefresh () {
+    lifeText.setText(": " + lifeInt)
 }
 function DiamondCounter () {
     diamondsText = textsprite.create("Test")
@@ -216,12 +248,15 @@ function GhostSpawner () {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
+    lifeInt += -1
     RefreshTextEnemiesCount()
+    LifeTextRefresh()
     sprites.destroy(otherSprite)
 })
 let ghostSpawnPoint: Sprite = null
 let enemiesLeftInt = 0
 let enemiesLeftText: TextSprite = null
+let lifeText: TextSprite = null
 let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
 let diamondSprite: Sprite = null
@@ -232,8 +267,10 @@ let attacking: animation.Animation = null
 let idling: animation.Animation = null
 let projectile: Sprite = null
 let reaper: Sprite = null
+let lifeInt = 0
 scene.setBackgroundColor(1)
 tiles.setCurrentTilemap(tilemap`level3`)
+lifeInt = 5
 PlayerController()
 scene.cameraFollowSprite(reaper)
 createCoins()
@@ -242,6 +279,8 @@ CountEnemiesLeft()
 RefreshTextEnemiesCount()
 DiamondCounter()
 DiamondCounterRefreshText()
+LifeText()
+LifeTextRefresh()
 game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
