@@ -47,7 +47,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (reaper.vy == 0) {
-        reaper.vy = -200
+        reaper.vy = -225
     }
 })
 scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardLava0, function (sprite, location) {
@@ -76,9 +76,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, other
     RefreshText()
     sprites.destroy(otherSprite)
 })
-function DiamondCounterRefreshText () {
-	
-}
 function RefreshText () {
     enemiesLeftText.setText(": " + enemiesLeftInt)
     diamondsText.setText(": " + diamondsCounterInt)
@@ -86,8 +83,8 @@ function RefreshText () {
 }
 function PlayerController () {
     reaper = sprites.create(assets.image`ReaperIdle1`, SpriteKind.Player)
-    reaper.setPosition(24, 170)
-    reaper.setScale(0.7, ScaleAnchor.Middle)
+    reaper.setPosition(27, 170)
+    reaper.setScale(0.65, ScaleAnchor.Middle)
     reaper.ay = 500
     controller.moveSprite(reaper, 150, 0)
     PlayerAnimations()
@@ -195,15 +192,12 @@ function ScreenText () {
     diamondsText.setFlag(SpriteFlag.RelativeToCamera, true)
     diamondsText.setPosition(80, 11)
 }
-function LifeText () {
-	
-}
 function createCoins () {
     for (let value of tiles.getTilesByType(assets.tile`myTile`)) {
         diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
         diamondSprite.setScale(0.4, ScaleAnchor.Middle)
         tiles.placeOnTile(diamondSprite, value)
-        tiles.setTileAt(value, sprites.dungeon.floorLight5)
+        tiles.setTileAt(value, assets.tile`transparency16`)
         CoinAnimation()
     }
 }
@@ -213,12 +207,6 @@ function GhostController () {
     ghost.setPosition(reaper.x + 70, reaper.y - 50)
     ghost.follow(reaper)
     GhostAnimations()
-}
-function LifeTextRefresh () {
-	
-}
-function DiamondCounter () {
-	
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
@@ -247,7 +235,7 @@ function GhostSpawner () {
             `, SpriteKind.ghostSpawner)
         enemiesLeftInt += 1
         tiles.placeOnTile(ghostSpawnPoint, value2)
-        tiles.setTileAt(value2, sprites.dungeon.floorLight5)
+        tiles.setTileAt(value2, assets.tile`transparency16`)
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
