@@ -73,11 +73,16 @@ function PlayerAnimations () {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
     diamondsCounterInt += 1
-    DiamondCounterRefreshText()
+    RefreshText()
     sprites.destroy(otherSprite)
 })
 function DiamondCounterRefreshText () {
+	
+}
+function RefreshText () {
+    enemiesLeftText.setText(": " + enemiesLeftInt)
     diamondsText.setText(": " + diamondsCounterInt)
+    lifeText.setText(": " + lifeInt)
 }
 function PlayerController () {
     reaper = sprites.create(assets.image`ReaperIdle1`, SpriteKind.Player)
@@ -115,7 +120,30 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.ghostSpawner, function (sprite, 
     sprites.destroy(otherSprite)
     GhostController()
 })
-function LifeText () {
+function ScreenText () {
+    enemiesLeftText = textsprite.create("Test")
+    enemiesLeftText.setBorder(1, 0, 1)
+    enemiesLeftText.setOutline(1, 15)
+    enemiesLeftText.setIcon(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . 4 . . e f . . . . . . . 
+        . . . . . . 4 f e e . . . . . . 
+        . . . . . . f f f f . . . . . . 
+        . . . . 1 . 4 f e e . . . . . . 
+        . . . . 1 e e e e e e . . . . . 
+        . . . . . e f e e e e . . . . . 
+        . . . . . f e f f e f . . . . . 
+        . . . . . e e e f f . . . . . . 
+        . . . . . e e e 7 f . . . . . . 
+        . . . . . . f e . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `)
+    enemiesLeftText.setFlag(SpriteFlag.RelativeToCamera, true)
+    enemiesLeftText.setPosition(130, 11)
     lifeText = textsprite.create("Test")
     lifeText.setBorder(1, 0, 1)
     lifeText.setOutline(1, 15)
@@ -143,52 +171,6 @@ function LifeText () {
         `)
     lifeText.setFlag(SpriteFlag.RelativeToCamera, true)
     lifeText.setPosition(30, 11)
-}
-function createCoins () {
-    for (let value of tiles.getTilesByType(assets.tile`myTile`)) {
-        diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
-        diamondSprite.setScale(0.4, ScaleAnchor.Middle)
-        tiles.placeOnTile(diamondSprite, value)
-        tiles.setTileAt(value, sprites.dungeon.floorLight5)
-        CoinAnimation()
-    }
-}
-function GhostController () {
-    ghost = sprites.create(assets.image`GhostIdle10`, SpriteKind.Enemy)
-    ghost.setScale(0.7, ScaleAnchor.Middle)
-    ghost.setPosition(reaper.x + 80, reaper.y - 80)
-    ghost.follow(reaper)
-    GhostAnimations()
-}
-function CountEnemiesLeft () {
-    enemiesLeftText = textsprite.create("Test")
-    enemiesLeftText.setBorder(1, 0, 1)
-    enemiesLeftText.setOutline(1, 15)
-    enemiesLeftText.setIcon(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . 4 . . e f . . . . . . . 
-        . . . . . . 4 f e e . . . . . . 
-        . . . . . . f f f f . . . . . . 
-        . . . . 1 . 4 f e e . . . . . . 
-        . . . . 1 e e e e e e . . . . . 
-        . . . . . e f e e e e . . . . . 
-        . . . . . f e f f e f . . . . . 
-        . . . . . e e e f f . . . . . . 
-        . . . . . e e e 7 f . . . . . . 
-        . . . . . . f e . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `)
-    enemiesLeftText.setFlag(SpriteFlag.RelativeToCamera, true)
-    enemiesLeftText.setPosition(130, 11)
-}
-function LifeTextRefresh () {
-    lifeText.setText(": " + lifeInt)
-}
-function DiamondCounter () {
     diamondsText = textsprite.create("Test")
     diamondsText.setBorder(1, 0, 1)
     diamondsText.setOutline(1, 15)
@@ -213,12 +195,34 @@ function DiamondCounter () {
     diamondsText.setFlag(SpriteFlag.RelativeToCamera, true)
     diamondsText.setPosition(80, 11)
 }
-function RefreshTextEnemiesCount () {
-    enemiesLeftText.setText(": " + enemiesLeftInt)
+function LifeText () {
+	
+}
+function createCoins () {
+    for (let value of tiles.getTilesByType(assets.tile`myTile`)) {
+        diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
+        diamondSprite.setScale(0.4, ScaleAnchor.Middle)
+        tiles.placeOnTile(diamondSprite, value)
+        tiles.setTileAt(value, sprites.dungeon.floorLight5)
+        CoinAnimation()
+    }
+}
+function GhostController () {
+    ghost = sprites.create(assets.image`GhostIdle10`, SpriteKind.Enemy)
+    ghost.setScale(0.7, ScaleAnchor.Middle)
+    ghost.setPosition(reaper.x + 70, reaper.y - 50)
+    ghost.follow(reaper)
+    GhostAnimations()
+}
+function LifeTextRefresh () {
+	
+}
+function DiamondCounter () {
+	
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
-    RefreshTextEnemiesCount()
+    RefreshText()
     sprites.destroy(otherSprite)
 })
 function GhostSpawner () {
@@ -249,19 +253,18 @@ function GhostSpawner () {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
     lifeInt += -1
-    RefreshTextEnemiesCount()
-    LifeTextRefresh()
+    RefreshText()
     sprites.destroy(otherSprite)
 })
 let ghostSpawnPoint: Sprite = null
-let enemiesLeftInt = 0
-let enemiesLeftText: TextSprite = null
-let lifeText: TextSprite = null
 let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
 let diamondSprite: Sprite = null
 let diamondIdle: animation.Animation = null
+let lifeText: TextSprite = null
 let diamondsText: TextSprite = null
+let enemiesLeftInt = 0
+let enemiesLeftText: TextSprite = null
 let diamondsCounterInt = 0
 let attacking: animation.Animation = null
 let idling: animation.Animation = null
@@ -275,12 +278,8 @@ PlayerController()
 scene.cameraFollowSprite(reaper)
 createCoins()
 GhostSpawner()
-CountEnemiesLeft()
-RefreshTextEnemiesCount()
-DiamondCounter()
-DiamondCounterRefreshText()
-LifeText()
-LifeTextRefresh()
+ScreenText()
+RefreshText()
 game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
