@@ -13,6 +13,12 @@ namespace SpriteKind {
 function DemonAnimations () {
     demonIdle = animation.createAnimation(ActionKind.Idle, 100)
     animation.attachAnimation(demonBoss, demonIdle)
+    demonIdle.addAnimationFrame(assets.image`DemonIdle1`)
+    demonIdle.addAnimationFrame(assets.image`DemonIdle2`)
+    demonIdle.addAnimationFrame(assets.image`DemonIdle3`)
+    demonIdle.addAnimationFrame(assets.image`DemonIdle4`)
+    demonIdle.addAnimationFrame(assets.image`DemonIdle5`)
+    demonIdle.addAnimationFrame(assets.image`DemonIdle6`)
     animation.setAction(demonBoss, ActionKind.Idle)
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -25,7 +31,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 function DemonBossSpawner () {
     for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
-        demonBoss = sprites.create(assets.image`DemonIdle6`, SpriteKind.DemonBoss)
+        demonBoss = sprites.create(assets.image`DemonIdle1`, SpriteKind.DemonBoss)
         demonBoss.ay = 500
         tiles.setTileAt(value, assets.tile`transparency16`)
         tiles.placeOnTile(demonBoss, value)
@@ -232,8 +238,8 @@ GhostSpawner()
 PortalCreator()
 ScreenText()
 RefreshText()
-game.showLongText("Elimina a todos los enemigos y consigue todos los diamantes!", DialogLayout.Bottom)
 DemonBossSpawner()
+game.showLongText("Elimina a todos los enemigos y consigue todos los diamantes!", DialogLayout.Bottom)
 game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
