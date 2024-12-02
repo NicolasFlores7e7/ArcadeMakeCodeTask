@@ -40,7 +40,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
                 animation.setAction(reaper, ActionKind.Attacking)
                 pause(150)
                 sprites.destroy(projectile)
-                animation.setAction(reaper, ActionKind.Idle)
+                animation.setAction(reaper, ActionKind.WalkingBackwards)
             }
         }
     }
@@ -48,6 +48,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 function DemonBossSpawner () {
     for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
         demonBoss = sprites.create(assets.image`DemonIdle1`, SpriteKind.DemonBoss)
+        demonBoss.setScale(0.85, ScaleAnchor.Middle)
         demonBoss.ay = 500
         tiles.setTileAt(value, assets.tile`transparency16`)
         tiles.placeOnTile(demonBoss, value)
@@ -342,8 +343,7 @@ let facingDirection = 0
 let demonBoss: Sprite = null
 let demonIdle: animation.Animation = null
 let level = 0
-let imports = sprites.create(assets.image`ReaperIdleInvert4`, SpriteKind.Player)
-level = 0
+level = 1
 LevelSelector()
 game.onUpdate(function () {
     AnimatorController()
