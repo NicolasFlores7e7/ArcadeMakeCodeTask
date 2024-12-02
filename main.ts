@@ -27,9 +27,18 @@ scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardLava0, function (sp
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherSprite) {
     if (enemiesLeftInt == 0 && diamondsCounterInt == totalDiamonds) {
-        game.gameOver(true)
+        for (let value of tiles.getTilesByType(assets.tile`myTile6`)) {
+            reaper.sayText("A por el boss", 500, false)
+            tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
+            tiles.setTileAt(value, assets.tile`transparency16`)
+            game.gameOver(true)
+        }
     } else {
-        reaper.sayText("Aún no")
+        reaper.sayText("Aún no", 500, false)
+        for (let value of tiles.getTilesByType(assets.tile`myTile6`)) {
+            tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
+            tiles.setTileAt(value, assets.tile`transparency16`)
+        }
     }
 })
 function PlayerAnimations () {
@@ -71,10 +80,13 @@ function RefreshText () {
 }
 function PlayerController () {
     reaper = sprites.create(assets.image`ReaperIdle1`, SpriteKind.Player)
-    reaper.setPosition(27, 170)
     reaper.setScale(0.65, ScaleAnchor.Middle)
     reaper.ay = 500
     controller.moveSprite(reaper, 150, 0)
+    for (let value of tiles.getTilesByType(assets.tile`myTile5`)) {
+        tiles.placeOnRandomTile(reaper, assets.tile`myTile5`)
+        tiles.setTileAt(value, assets.tile`transparency16`)
+    }
     PlayerAnimations()
 }
 function CoinAnimation () {
