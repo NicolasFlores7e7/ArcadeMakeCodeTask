@@ -8,6 +8,12 @@ namespace SpriteKind {
     export const diamond = SpriteKind.create()
     export const ghostSpawner = SpriteKind.create()
     export const Portal = SpriteKind.create()
+    export const DemonBoss = SpriteKind.create()
+}
+function DemonAnimations () {
+    demonIdle = animation.createAnimation(ActionKind.Idle, 100)
+    animation.attachAnimation(demonBoss, demonIdle)
+    animation.setAction(demonBoss, ActionKind.Idle)
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
@@ -17,6 +23,15 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     sprites.destroy(projectile)
     animation.setAction(reaper, ActionKind.Idle)
 })
+function DemonBossSpawner () {
+    for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
+        demonBoss = sprites.create(assets.image`DemonIdle6`, SpriteKind.DemonBoss)
+        demonBoss.ay = 500
+        tiles.setTileAt(value, assets.tile`transparency16`)
+        tiles.placeOnTile(demonBoss, value)
+        DemonAnimations()
+    }
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (reaper.vy == 0) {
         reaper.vy = -225
@@ -27,17 +42,17 @@ scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardLava0, function (sp
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherSprite) {
     if (enemiesLeftInt == 0 && diamondsCounterInt == totalDiamonds) {
-        for (let value of tiles.getTilesByType(assets.tile`myTile6`)) {
-            reaper.sayText("A por el boss", 500, false)
+        for (let value2 of tiles.getTilesByType(assets.tile`myTile6`)) {
             tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
-            tiles.setTileAt(value, assets.tile`transparency16`)
+            tiles.setTileAt(value2, assets.tile`transparency16`)
             game.gameOver(true)
         }
     } else {
         reaper.sayText("Aún no", 500, false)
-        for (let value of tiles.getTilesByType(assets.tile`myTile6`)) {
+        game.showLongText("Tu enemigo final esta en la siguiente arena, DERRÓTALO!", DialogLayout.Bottom)
+        for (let value22 of tiles.getTilesByType(assets.tile`myTile6`)) {
             tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
-            tiles.setTileAt(value, assets.tile`transparency16`)
+            tiles.setTileAt(value22, assets.tile`transparency16`)
         }
     }
 })
@@ -66,10 +81,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, other
     sprites.destroy(otherSprite)
 })
 function PortalCreator () {
-    for (let value of tiles.getTilesByType(assets.tile`myTile4`)) {
+    for (let value3 of tiles.getTilesByType(assets.tile`myTile4`)) {
         portal = sprites.create(assets.image`Portal7`, SpriteKind.Portal)
-        tiles.placeOnTile(portal, value)
-        tiles.setTileAt(value, assets.tile`transparency16`)
+        tiles.placeOnTile(portal, value3)
+        tiles.setTileAt(value3, assets.tile`transparency16`)
         PortalAnimator()
     }
 }
@@ -83,9 +98,9 @@ function PlayerController () {
     reaper.setScale(0.65, ScaleAnchor.Middle)
     reaper.ay = 500
     controller.moveSprite(reaper, 150, 0)
-    for (let value of tiles.getTilesByType(assets.tile`myTile5`)) {
+    for (let value4 of tiles.getTilesByType(assets.tile`myTile5`)) {
         tiles.placeOnRandomTile(reaper, assets.tile`myTile5`)
-        tiles.setTileAt(value, assets.tile`transparency16`)
+        tiles.setTileAt(value4, assets.tile`transparency16`)
     }
     PlayerAnimations()
 }
@@ -151,12 +166,12 @@ function PortalAnimator () {
     animation.setAction(portal, ActionKind.Walking)
 }
 function createCoins () {
-    for (let value of tiles.getTilesByType(assets.tile`myTile`)) {
+    for (let value5 of tiles.getTilesByType(assets.tile`myTile`)) {
         diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
         totalDiamonds += 1
         diamondSprite.setScale(0.4, ScaleAnchor.Middle)
-        tiles.placeOnTile(diamondSprite, value)
-        tiles.setTileAt(value, assets.tile`transparency16`)
+        tiles.placeOnTile(diamondSprite, value5)
+        tiles.setTileAt(value5, assets.tile`transparency16`)
         CoinAnimation()
     }
 }
@@ -173,11 +188,11 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     sprites.destroy(otherSprite)
 })
 function GhostSpawner () {
-    for (let value2 of tiles.getTilesByType(assets.tile`myTile0`)) {
+    for (let value6 of tiles.getTilesByType(assets.tile`myTile0`)) {
         ghostSpawnPoint = sprites.create(assets.image`GhostSpawner`, SpriteKind.ghostSpawner)
         enemiesLeftInt += 1
-        tiles.placeOnTile(ghostSpawnPoint, value2)
-        tiles.setTileAt(value2, assets.tile`transparency16`)
+        tiles.placeOnTile(ghostSpawnPoint, value6)
+        tiles.setTileAt(value6, assets.tile`transparency16`)
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -202,6 +217,8 @@ let totalDiamonds = 0
 let diamondsCounterInt = 0
 let enemiesLeftInt = 0
 let projectile: Sprite = null
+let demonBoss: Sprite = null
+let demonIdle: animation.Animation = null
 let reaper: Sprite = null
 let lifeInt = 0
 scene.setBackgroundColor(1)
@@ -216,6 +233,7 @@ PortalCreator()
 ScreenText()
 RefreshText()
 game.showLongText("Elimina a todos los enemigos y consigue todos los diamantes!", DialogLayout.Bottom)
+DemonBossSpawner()
 game.onUpdate(function () {
     if (reaper.vx < 0) {
         reaper.setImage(assets.image`ReaperIdle1`)
