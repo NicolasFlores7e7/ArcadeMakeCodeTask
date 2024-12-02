@@ -22,12 +22,14 @@ function DemonAnimations () {
     animation.setAction(demonBoss, ActionKind.Idle)
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
-    projectile.setScale(0.8, ScaleAnchor.Middle)
-    animation.setAction(reaper, ActionKind.Attacking)
-    pause(150)
-    sprites.destroy(projectile)
-    animation.setAction(reaper, ActionKind.Idle)
+    if (level == 1) {
+        projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
+        projectile.setScale(0.8, ScaleAnchor.Middle)
+        animation.setAction(reaper, ActionKind.Attacking)
+        pause(150)
+        sprites.destroy(projectile)
+        animation.setAction(reaper, ActionKind.Idle)
+    }
 })
 function DemonBossSpawner () {
     for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
@@ -39,8 +41,10 @@ function DemonBossSpawner () {
     }
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (reaper.vy == 0) {
-        reaper.vy = -225
+    if (level == 1) {
+        if (reaper.vy == 0) {
+            reaper.vy = -225
+        }
     }
 })
 scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardLava0, function (sprite, location) {
@@ -56,9 +60,9 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherS
     } else {
         reaper.sayText("Aún no", 500, false)
         game.showLongText("Tu enemigo final esta en la siguiente arena, DERRÓTALO!", DialogLayout.Bottom)
-        for (let value22 of tiles.getTilesByType(assets.tile`myTile6`)) {
+        for (let value3 of tiles.getTilesByType(assets.tile`myTile6`)) {
             tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
-            tiles.setTileAt(value22, assets.tile`transparency16`)
+            tiles.setTileAt(value3, assets.tile`transparency16`)
         }
     }
 })
@@ -87,10 +91,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, other
     sprites.destroy(otherSprite)
 })
 function PortalCreator () {
-    for (let value3 of tiles.getTilesByType(assets.tile`myTile4`)) {
+    for (let value4 of tiles.getTilesByType(assets.tile`myTile4`)) {
         portal = sprites.create(assets.image`Portal7`, SpriteKind.Portal)
-        tiles.placeOnTile(portal, value3)
-        tiles.setTileAt(value3, assets.tile`transparency16`)
+        tiles.placeOnTile(portal, value4)
+        tiles.setTileAt(value4, assets.tile`transparency16`)
         PortalAnimator()
     }
 }
@@ -99,14 +103,77 @@ function RefreshText () {
     diamondsText.setText(": " + diamondsCounterInt)
     lifeText.setText(": " + lifeInt)
 }
+function LevelSelector () {
+    if (level == 0) {
+        scene.setBackgroundImage(assets.image`GameBGDef`)
+        mainMenu = miniMenu.createMenuFromArray([miniMenu.createMenuItem("Jugar"), miniMenu.createMenuItem("Historia"), miniMenu.createMenuItem("Controles")])
+        mainMenu.setMenuStyleProperty(miniMenu.MenuStyleProperty.Width, 75)
+        mainMenu.setFrame(img`
+            ..bbbbbbbbbbbbbbbbbbbb..
+            .bd999999999999999999db.
+            bd9dbbbbbbbbbbbbbbbbd9db
+            b9dbbbbbbbbbbbbbbbbbbd9b
+            b9bd9999999999999999db9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9b999999999999999999b9b
+            b9bd9999999999999999db9b
+            bd9bbbbbbbbbbbbbbbbbb9db
+            bbd999999999999999999dbb
+            .bbbbbbbbbbbbbbbbbbbbbb.
+            ..bbbbbbbbbbbbbbbbbbbb..
+            `)
+        mainMenu.setPosition(120, 85)
+        mainMenu.setStyleProperty(miniMenu.StyleKind.All, miniMenu.StyleProperty.Alignment, 0)
+        mainMenu.setStyleProperty(miniMenu.StyleKind.All, miniMenu.StyleProperty.Background, 9)
+        mainMenu.setStyleProperty(miniMenu.StyleKind.Selected, miniMenu.StyleProperty.Background, 11)
+        mainMenu.onButtonPressed(controller.A, function (selection, selectedIndex) {
+            mainMenu.close()
+            if (selectedIndex == 0) {
+                level = 1
+                LevelSelector()
+            } else if (selectedIndex == 1) {
+                game.showLongText("En un mundo fracturado por el caos, la barrera entre los vivos y los muertos ha sido rota por " + "Abyzark, el Señor del Caos, un demonio despiadado que busca reclamar tanto el inframundo como el reino de los vivos." + "Los fantasmas errantes, almas perdidas liberadas por Abyzark, " + "ahora vagan sin control, sembrando desorden en su desolación." + "" + "\nEntra en escena Nyxa, la encarnación de la Muerte misma. Armada con su guadaña espectral y habilidades místicas" + "Nyxa debe restaurar el equilibrio enviando a los fantasmas errantes de vuelta al inframundo " + "y enfrentándose a Abyzark en un duelo que decidirá el destino de ambos mundos.", DialogLayout.Full)
+                game.reset()
+            } else if (selectedIndex == 2) {
+                game.showLongText("Movimiento : crucetas\\n" + "Atacar: B\\n" + "Saltar: A", DialogLayout.Full)
+                game.reset()
+            }
+        })
+    } else if (level == 1) {
+        lifeInt = 99
+        scene.setBackgroundColor(1)
+        scene.setBackgroundImage(assets.image`GameBG`)
+        tiles.setCurrentTilemap(tilemap`level`)
+        PlayerController()
+        scene.cameraFollowSprite(reaper)
+        createCoins()
+        GhostSpawner()
+        PortalCreator()
+        ScreenText()
+        RefreshText()
+        DemonBossSpawner()
+    }
+}
 function PlayerController () {
     reaper = sprites.create(assets.image`ReaperIdle1`, SpriteKind.Player)
     reaper.setScale(0.65, ScaleAnchor.Middle)
     reaper.ay = 500
     controller.moveSprite(reaper, 150, 0)
-    for (let value4 of tiles.getTilesByType(assets.tile`myTile5`)) {
+    for (let value5 of tiles.getTilesByType(assets.tile`myTile5`)) {
         tiles.placeOnRandomTile(reaper, assets.tile`myTile5`)
-        tiles.setTileAt(value4, assets.tile`transparency16`)
+        tiles.setTileAt(value5, assets.tile`transparency16`)
     }
     PlayerAnimations()
 }
@@ -172,12 +239,12 @@ function PortalAnimator () {
     animation.setAction(portal, ActionKind.Walking)
 }
 function createCoins () {
-    for (let value5 of tiles.getTilesByType(assets.tile`myTile`)) {
+    for (let value6 of tiles.getTilesByType(assets.tile`myTile`)) {
         diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
         totalDiamonds += 1
         diamondSprite.setScale(0.4, ScaleAnchor.Middle)
-        tiles.placeOnTile(diamondSprite, value5)
-        tiles.setTileAt(value5, assets.tile`transparency16`)
+        tiles.placeOnTile(diamondSprite, value6)
+        tiles.setTileAt(value6, assets.tile`transparency16`)
         CoinAnimation()
     }
 }
@@ -196,11 +263,11 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     sprites.destroy(otherSprite)
 })
 function GhostSpawner () {
-    for (let value6 of tiles.getTilesByType(assets.tile`myTile0`)) {
+    for (let value7 of tiles.getTilesByType(assets.tile`myTile0`)) {
         ghostSpawnPoint = sprites.create(assets.image`GhostSpawner`, SpriteKind.ghostSpawner)
         enemiesLeftInt += 1
-        tiles.placeOnTile(ghostSpawnPoint, value6)
-        tiles.setTileAt(value6, assets.tile`transparency16`)
+        tiles.placeOnTile(ghostSpawnPoint, value7)
+        tiles.setTileAt(value7, assets.tile`transparency16`)
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -223,6 +290,8 @@ let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
 let diamondSprite: Sprite = null
 let diamondIdle: animation.Animation = null
+let mainMenu: miniMenu.MenuSprite = null
+let lifeInt = 0
 let lifeText: TextSprite = null
 let diamondsText: TextSprite = null
 let enemiesLeftText: TextSprite = null
@@ -232,65 +301,13 @@ let idling: animation.Animation = null
 let totalDiamonds = 0
 let diamondsCounterInt = 0
 let enemiesLeftInt = 0
+let reaper: Sprite = null
 let projectile: Sprite = null
 let demonBoss: Sprite = null
 let demonIdle: animation.Animation = null
-let reaper: Sprite = null
-let lifeInt = 0
-let mainMenu: miniMenu.MenuSprite = null
-let mainMenuItems: miniMenu.MenuItem[] = []
 let level = 0
-if (level == 0) {
-    mainMenuItems = [
-    miniMenu.createMenuItem("Jugar"),
-    miniMenu.createMenuItem("Lore"),
-    miniMenu.createMenuItem("Controles"),
-    miniMenu.createMenuItem("Salir")
-    ]
-    mainMenu = miniMenu.createMenuFromArray(mainMenuItems)
-    mainMenu.setMenuStyleProperty(miniMenu.MenuStyleProperty.Width, 100)
-    mainMenu.setFrame(img`
-        ..bbbbbbbbbbbbbbbbbbbb..
-        .bd111111111111111111db.
-        bd1dbbbbbbbbbbbbbbbbd1db
-        b1dbbbbbbbbbbbbbbbbbbd1b
-        b1bd1111111111111111db1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1b111111111111111111b1b
-        b1bd1111111111111111db1b
-        bd1bbbbbbbbbbbbbbbbbb1db
-        bbd111111111111111111dbb
-        .bbbbbbbbbbbbbbbbbbbbbb.
-        ..bbbbbbbbbbbbbbbbbbbb..
-        `)
-    mainMenu.setPosition(111, 90)
-    scene.setBackgroundImage(assets.image`Bg`)
-} else {
-    scene.setBackgroundColor(1)
-    scene.setBackgroundImage(assets.image`Bg`)
-    tiles.setCurrentTilemap(tilemap`level`)
-    lifeInt = 99
-    PlayerController()
-    scene.cameraFollowSprite(reaper)
-    createCoins()
-    GhostSpawner()
-    PortalCreator()
-    ScreenText()
-    RefreshText()
-    DemonBossSpawner()
-}
+level = 0
+LevelSelector()
 game.onUpdate(function () {
     if (level == 1) {
         if (reaper.vx < 0) {
