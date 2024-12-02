@@ -2,7 +2,8 @@ enum ActionKind {
     Walking,
     Idle,
     Jumping,
-    Attacking
+    Attacking,
+    WalkingBackwards
 }
 namespace SpriteKind {
     export const diamond = SpriteKind.create()
@@ -23,12 +24,25 @@ function DemonAnimations () {
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
-        projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
-        projectile.setScale(0.8, ScaleAnchor.Middle)
-        animation.setAction(reaper, ActionKind.Attacking)
-        pause(150)
-        sprites.destroy(projectile)
-        animation.setAction(reaper, ActionKind.Idle)
+        if (facingDirection == 1) {
+            projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
+            projectile.setScale(0.8, ScaleAnchor.Middle)
+            animation.setAction(reaper, ActionKind.Attacking)
+            pause(150)
+            sprites.destroy(projectile)
+            animation.setAction(reaper, ActionKind.Idle)
+        } else {
+            if (facingDirection == 2) {
+                projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, -50, 0)
+                projectile.setScale(0.8, ScaleAnchor.Middle)
+                projectile.setImage(assets.image`ReaperAttack`)
+                projectile.image.flipX()
+                animation.setAction(reaper, ActionKind.Attacking)
+                pause(150)
+                sprites.destroy(projectile)
+                animation.setAction(reaper, ActionKind.Idle)
+            }
+        }
     }
 })
 function DemonBossSpawner () {
@@ -68,6 +82,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherS
 })
 function PlayerAnimations () {
     idling = animation.createAnimation(ActionKind.Idle, 100)
+    idlingReverse = animation.createAnimation(ActionKind.WalkingBackwards, 100)
     attacking = animation.createAnimation(ActionKind.Attacking, 5)
     idling.addAnimationFrame(assets.image`ReaperIdle1`)
     idling.addAnimationFrame(assets.image`ReaperIdle2`)
@@ -80,15 +95,22 @@ function PlayerAnimations () {
     attacking.addAnimationFrame(assets.image`ReaperAttack5`)
     attacking.addAnimationFrame(assets.image`ReaperAttack6`)
     attacking.addAnimationFrame(assets.image`ReaperAttack7`)
+    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert1`)
+    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert2`)
+    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert3`)
+    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert4`)
     animation.attachAnimation(reaper, idling)
+    animation.attachAnimation(reaper, idlingReverse)
     animation.attachAnimation(reaper, attacking)
-    animation.setAction(reaper, ActionKind.Idle)
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
     diamondsCounterInt += 1
     reaper.sayText("Diamantito!", 500, false)
     RefreshText()
     sprites.destroy(otherSprite)
+})
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    facingDirection = 2
 })
 function PortalCreator () {
     for (let value4 of tiles.getTilesByType(assets.tile`myTile4`)) {
@@ -153,6 +175,7 @@ function LevelSelector () {
         })
     } else if (level == 1) {
         lifeInt = 99
+        facingDirection = 1
         scene.setBackgroundColor(1)
         scene.setBackgroundImage(assets.image`GameBG`)
         tiles.setCurrentTilemap(tilemap`level`)
@@ -177,6 +200,9 @@ function PlayerController () {
     }
     PlayerAnimations()
 }
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    facingDirection = 1
+})
 function CoinAnimation () {
     diamondIdle = animation.createAnimation(ActionKind.Idle, 100)
     diamondIdle.addAnimationFrame(assets.image`Diamond1`)
@@ -257,6 +283,14 @@ function GhostController () {
     }
     GhostAnimations()
 }
+function AnimatorController () {
+    if (facingDirection == 1) {
+        animation.setAction(reaper, ActionKind.Idle)
+    }
+    if (facingDirection == 2) {
+        animation.setAction(reaper, ActionKind.WalkingBackwards)
+    }
+}
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
     RefreshText()
@@ -297,24 +331,22 @@ let diamondsText: TextSprite = null
 let enemiesLeftText: TextSprite = null
 let portal: Sprite = null
 let attacking: animation.Animation = null
+let idlingReverse: animation.Animation = null
 let idling: animation.Animation = null
 let totalDiamonds = 0
 let diamondsCounterInt = 0
 let enemiesLeftInt = 0
 let reaper: Sprite = null
 let projectile: Sprite = null
+let facingDirection = 0
 let demonBoss: Sprite = null
 let demonIdle: animation.Animation = null
 let level = 0
+let imports = sprites.create(assets.image`ReaperIdleInvert4`, SpriteKind.Player)
 level = 0
 LevelSelector()
 game.onUpdate(function () {
-    if (level == 1) {
-        if (reaper.vx < 0) {
-            reaper.setImage(assets.image`ReaperIdle1`)
-            reaper.image.flipX()
-        }
-    }
+    AnimatorController()
 })
 game.onUpdateInterval(100, function () {
     if (level == 1) {
