@@ -185,7 +185,9 @@ function GhostController () {
     ghost = sprites.create(assets.image`GhostIdle10`, SpriteKind.Enemy)
     ghost.setScale(0.7, ScaleAnchor.Middle)
     ghost.setPosition(reaper.x + 70, reaper.y - 50)
-    ghost.follow(reaper)
+    if (!(invincible)) {
+        ghost.follow(reaper)
+    }
     GhostAnimations()
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -202,12 +204,20 @@ function GhostSpawner () {
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    enemiesLeftInt += -1
     lifeInt += -1
     RefreshText()
-    sprites.destroy(otherSprite)
+    reaper.sayText("AU", 200, false)
+    ghost.setVelocity(800, 0)
+    invincible = true
+    if (invincible) {
+        ghost.follow(null)
+        pause(1000)
+        ghost.follow(sprite)
+        invincible = false
+    }
 })
 let ghostSpawnPoint: Sprite = null
+let invincible = false
 let portalAnim: animation.Animation = null
 let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
@@ -227,27 +237,72 @@ let demonBoss: Sprite = null
 let demonIdle: animation.Animation = null
 let reaper: Sprite = null
 let lifeInt = 0
-scene.setBackgroundColor(1)
-scene.setBackgroundImage(assets.image`Bg`)
-tiles.setCurrentTilemap(tilemap`level`)
-lifeInt = 99
-PlayerController()
-scene.cameraFollowSprite(reaper)
-createCoins()
-GhostSpawner()
-PortalCreator()
-ScreenText()
-RefreshText()
-DemonBossSpawner()
-game.showLongText("Elimina a todos los enemigos y consigue todos los diamantes!", DialogLayout.Bottom)
+let mainMenu: miniMenu.MenuSprite = null
+let mainMenuItems: miniMenu.MenuItem[] = []
+let level = 0
+if (level == 0) {
+    mainMenuItems = [
+    miniMenu.createMenuItem("Jugar"),
+    miniMenu.createMenuItem("Lore"),
+    miniMenu.createMenuItem("Controles"),
+    miniMenu.createMenuItem("Salir")
+    ]
+    mainMenu = miniMenu.createMenuFromArray(mainMenuItems)
+    mainMenu.setMenuStyleProperty(miniMenu.MenuStyleProperty.Width, 100)
+    mainMenu.setFrame(img`
+        ..bbbbbbbbbbbbbbbbbbbb..
+        .bd111111111111111111db.
+        bd1dbbbbbbbbbbbbbbbbd1db
+        b1dbbbbbbbbbbbbbbbbbbd1b
+        b1bd1111111111111111db1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1b111111111111111111b1b
+        b1bd1111111111111111db1b
+        bd1bbbbbbbbbbbbbbbbbb1db
+        bbd111111111111111111dbb
+        .bbbbbbbbbbbbbbbbbbbbbb.
+        ..bbbbbbbbbbbbbbbbbbbb..
+        `)
+    mainMenu.setPosition(111, 90)
+    scene.setBackgroundImage(assets.image`Bg`)
+} else {
+    scene.setBackgroundColor(1)
+    scene.setBackgroundImage(assets.image`Bg`)
+    tiles.setCurrentTilemap(tilemap`level`)
+    lifeInt = 99
+    PlayerController()
+    scene.cameraFollowSprite(reaper)
+    createCoins()
+    GhostSpawner()
+    PortalCreator()
+    ScreenText()
+    RefreshText()
+    DemonBossSpawner()
+}
 game.onUpdate(function () {
-    if (reaper.vx < 0) {
-        reaper.setImage(assets.image`ReaperIdle1`)
-        reaper.image.flipX()
+    if (level == 1) {
+        if (reaper.vx < 0) {
+            reaper.setImage(assets.image`ReaperIdle1`)
+            reaper.image.flipX()
+        }
     }
 })
 game.onUpdateInterval(100, function () {
-    if (lifeInt == 0) {
-        game.gameOver(false)
+    if (level == 1) {
+        if (lifeInt == 0) {
+            game.gameOver(false)
+        }
     }
 })
