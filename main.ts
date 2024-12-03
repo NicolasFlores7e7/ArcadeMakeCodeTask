@@ -3,24 +3,14 @@ enum ActionKind {
     Idle,
     Jumping,
     Attacking,
-    WalkingBackwards
+    WalkingBackwards,
+    Hurt
 }
 namespace SpriteKind {
     export const diamond = SpriteKind.create()
     export const ghostSpawner = SpriteKind.create()
     export const Portal = SpriteKind.create()
-    export const DemonBoss = SpriteKind.create()
-}
-function DemonAnimations () {
-    demonIdle = animation.createAnimation(ActionKind.Idle, 100)
-    animation.attachAnimation(demonBoss, demonIdle)
-    demonIdle.addAnimationFrame(assets.image`DemonIdle1`)
-    demonIdle.addAnimationFrame(assets.image`DemonIdle2`)
-    demonIdle.addAnimationFrame(assets.image`DemonIdle3`)
-    demonIdle.addAnimationFrame(assets.image`DemonIdle4`)
-    demonIdle.addAnimationFrame(assets.image`DemonIdle5`)
-    demonIdle.addAnimationFrame(assets.image`DemonIdle6`)
-    animation.setAction(demonBoss, ActionKind.Idle)
+    export const Boss = SpriteKind.create()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
@@ -45,16 +35,6 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
-function DemonBossSpawner () {
-    for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
-        demonBoss = sprites.create(assets.image`DemonIdle1`, SpriteKind.DemonBoss)
-        demonBoss.setScale(0.85, ScaleAnchor.Middle)
-        demonBoss.ay = 500
-        tiles.setTileAt(value, assets.tile`transparency16`)
-        tiles.placeOnTile(demonBoss, value)
-        DemonAnimations()
-    }
-}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
         if (reaper.vy == 0) {
@@ -69,7 +49,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherS
     if (enemiesLeftInt == 0 && diamondsCounterInt == totalDiamonds) {
         for (let value2 of tiles.getTilesByType(assets.tile`myTile6`)) {
             tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
-            tiles.setTileAt(value2, assets.tile`transparency16`)
+            tiles.setTileAt(value2, sprites.dungeon.floorLight4)
             game.gameOver(true)
         }
     } else {
@@ -104,6 +84,15 @@ function PlayerAnimations () {
     animation.attachAnimation(reaper, idlingReverse)
     animation.attachAnimation(reaper, attacking)
 }
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Boss, function (sprite, otherSprite) {
+    bossInvulnerable = true
+    if (bossInvulnerable) {
+        animation.setAction(boss, ActionKind.Hurt)
+        pause(1000)
+        bossInvulnerable = false
+    }
+    animation.setAction(boss, ActionKind.Idle)
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
     diamondsCounterInt += 1
     reaper.sayText("Diamantito!", 500, false)
@@ -126,37 +115,21 @@ function RefreshText () {
     diamondsText.setText(": " + diamondsCounterInt)
     lifeText.setText(": " + lifeInt)
 }
+function BossSpawner () {
+    for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
+        boss = sprites.create(assets.image`BossIdle1`, SpriteKind.Boss)
+        boss.ay = 500
+        tiles.setTileAt(value, sprites.dungeon.floorLight4)
+        tiles.placeOnTile(boss, value)
+        BossAnimations()
+    }
+}
 function LevelSelector () {
     if (level == 0) {
         scene.setBackgroundImage(assets.image`GameBGDef`)
         mainMenu = miniMenu.createMenuFromArray([miniMenu.createMenuItem("Jugar"), miniMenu.createMenuItem("Historia"), miniMenu.createMenuItem("Controles")])
         mainMenu.setMenuStyleProperty(miniMenu.MenuStyleProperty.Width, 75)
-        mainMenu.setFrame(img`
-            ..bbbbbbbbbbbbbbbbbbbb..
-            .bd999999999999999999db.
-            bd9dbbbbbbbbbbbbbbbbd9db
-            b9dbbbbbbbbbbbbbbbbbbd9b
-            b9bd9999999999999999db9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9b999999999999999999b9b
-            b9bd9999999999999999db9b
-            bd9bbbbbbbbbbbbbbbbbb9db
-            bbd999999999999999999dbb
-            .bbbbbbbbbbbbbbbbbbbbbb.
-            ..bbbbbbbbbbbbbbbbbbbb..
-            `)
+        mainMenu.setFrame(assets.image`FondoTexto`)
         mainMenu.setPosition(120, 85)
         mainMenu.setStyleProperty(miniMenu.StyleKind.All, miniMenu.StyleProperty.Alignment, 0)
         mainMenu.setStyleProperty(miniMenu.StyleKind.All, miniMenu.StyleProperty.Background, 9)
@@ -187,7 +160,7 @@ function LevelSelector () {
         PortalCreator()
         ScreenText()
         RefreshText()
-        DemonBossSpawner()
+        BossSpawner()
     }
 }
 function PlayerController () {
@@ -212,6 +185,36 @@ function CoinAnimation () {
     diamondIdle.addAnimationFrame(assets.image`Diamond4`)
     animation.attachAnimation(diamondSprite, diamondIdle)
     animation.setAction(diamondSprite, ActionKind.Idle)
+}
+function BossAnimations () {
+    bossIdle = animation.createAnimation(ActionKind.Idle, 100)
+    animation.attachAnimation(boss, bossIdle)
+    bossIdle.addAnimationFrame(assets.image`BossIdle1`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle2`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle3`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle4`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle5`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle6`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle7`)
+    bossIdle.addAnimationFrame(assets.image`BossIdle8`)
+    bossAttack = animation.createAnimation(ActionKind.Attacking, 100)
+    animation.attachAnimation(boss, bossAttack)
+    bossAttack.addAnimationFrame(assets.image`BossAttack1`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack2`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack3`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack4`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack5`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack6`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack7`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack8`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack9`)
+    bossAttack.addAnimationFrame(assets.image`BossAttack10`)
+    bossHurt = animation.createAnimation(ActionKind.Hurt, 100)
+    animation.attachAnimation(boss, bossHurt)
+    bossHurt.addAnimationFrame(assets.image`BossHurt1`)
+    bossHurt.addAnimationFrame(assets.image`BossHurt2`)
+    bossHurt.addAnimationFrame(assets.image`BossHurt3`)
+    animation.setAction(boss, ActionKind.Idle)
 }
 function GhostAnimations () {
     ghostIdle = animation.createAnimation(ActionKind.Idle, 100)
@@ -318,11 +321,23 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSp
         invincible = false
     }
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSprite) {
+    lifeInt += -1
+    RefreshText()
+    invincible = true
+    if (invincible) {
+        pause(1000)
+        invincible = false
+    }
+})
 let ghostSpawnPoint: Sprite = null
 let invincible = false
 let portalAnim: animation.Animation = null
 let ghost: Sprite = null
 let ghostIdle: animation.Animation = null
+let bossHurt: animation.Animation = null
+let bossAttack: animation.Animation = null
+let bossIdle: animation.Animation = null
 let diamondSprite: Sprite = null
 let diamondIdle: animation.Animation = null
 let mainMenu: miniMenu.MenuSprite = null
@@ -331,6 +346,8 @@ let lifeText: TextSprite = null
 let diamondsText: TextSprite = null
 let enemiesLeftText: TextSprite = null
 let portal: Sprite = null
+let boss: Sprite = null
+let bossInvulnerable = false
 let attacking: animation.Animation = null
 let idlingReverse: animation.Animation = null
 let idling: animation.Animation = null
@@ -340,9 +357,8 @@ let enemiesLeftInt = 0
 let reaper: Sprite = null
 let projectile: Sprite = null
 let facingDirection = 0
-let demonBoss: Sprite = null
-let demonIdle: animation.Animation = null
 let level = 0
+let imports = sprites.create(assets.image`BossHurt3`, SpriteKind.Enemy)
 level = 1
 LevelSelector()
 game.onUpdate(function () {
