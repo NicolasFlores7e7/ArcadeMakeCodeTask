@@ -11,30 +11,83 @@ namespace SpriteKind {
     export const ghostSpawner = SpriteKind.create()
     export const Portal = SpriteKind.create()
     export const Boss = SpriteKind.create()
+    export const Potion = SpriteKind.create()
+}
+function PotionsSpawner () {
+    for (let value of tiles.getTilesByType(assets.tile`myTile8`)) {
+        potion = sprites.create(assets.image`Potion1`, SpriteKind.Potion)
+        animation.runImageAnimation(
+        potion,
+        assets.animation`PotionAnim`,
+        100,
+        true
+        )
+        tiles.placeOnTile(potion, value)
+        tiles.setTileAt(value, assets.tile`transparency16`)
+    }
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
         if (facingDirection == 1) {
-            projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 50, 0)
-            projectile.setScale(0.8, ScaleAnchor.Middle)
-            animation.setAction(reaper, ActionKind.Attacking)
-            pause(150)
-            sprites.destroy(projectile)
-            animation.setAction(reaper, ActionKind.Idle)
-        } else {
-            if (facingDirection == 2) {
-                projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, -50, 0)
+            if (canAttack) {
+                canAttack = false
+                animation.runImageAnimation(
+                reaper,
+                assets.animation`ReaperAttackAnim`,
+                80,
+                false
+                )
+                projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 70, 0)
                 projectile.setScale(0.8, ScaleAnchor.Middle)
-                projectile.setImage(assets.image`ReaperAttack`)
-                projectile.image.flipX()
-                animation.setAction(reaper, ActionKind.Attacking)
                 pause(150)
                 sprites.destroy(projectile)
-                animation.setAction(reaper, ActionKind.WalkingBackwards)
+                animation.runImageAnimation(
+                reaper,
+                assets.animation`ReaperIdleAnim`,
+                80,
+                true
+                )
+            }
+        } else {
+            if (facingDirection == 2) {
+                if (canAttack) {
+                    canAttack = false
+                    animation.runImageAnimation(
+                    reaper,
+                    assets.animation`ReaperReverseAttackAnim`,
+                    80,
+                    false
+                    )
+                    projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, -50, 0)
+                    projectile.setScale(0.8, ScaleAnchor.Middle)
+                    projectile.setImage(assets.image`ReaperAttack`)
+                    projectile.image.flipX()
+                    pause(150)
+                    sprites.destroy(projectile)
+                    animation.runImageAnimation(
+                    reaper,
+                    assets.animation`ReaperIdleReverseAnim`,
+                    100,
+                    false
+                    )
+                }
             }
         }
     }
 })
+function PortalSpawner () {
+    for (let value4 of tiles.getTilesByType(assets.tile`myTile4`)) {
+        portal = sprites.create(assets.image`Portal7`, SpriteKind.Portal)
+        animation.runImageAnimation(
+        portal,
+        assets.animation`PortalAnim`,
+        100,
+        true
+        )
+        tiles.placeOnTile(portal, value4)
+        tiles.setTileAt(value4, assets.tile`transparency16`)
+    }
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
         if (reaper.vy == 0) {
@@ -50,48 +103,35 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherS
         for (let value2 of tiles.getTilesByType(assets.tile`myTile6`)) {
             tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
             tiles.setTileAt(value2, sprites.dungeon.floorLight4)
-            game.gameOver(true)
+            game.showLongText("Tu enemigo final esta en la siguiente arena, DERRÓTALO!", DialogLayout.Bottom)
         }
+        areWeInBossArea = true
+        ScreenText()
+        RefreshText()
     } else {
         reaper.sayText("Aún no", 500, false)
-        game.showLongText("Tu enemigo final esta en la siguiente arena, DERRÓTALO!", DialogLayout.Bottom)
-        for (let value3 of tiles.getTilesByType(assets.tile`myTile6`)) {
-            tiles.placeOnRandomTile(reaper, assets.tile`myTile6`)
-            tiles.setTileAt(value3, assets.tile`transparency16`)
-        }
     }
 })
-function PlayerAnimations () {
-    idling = animation.createAnimation(ActionKind.Idle, 100)
-    idlingReverse = animation.createAnimation(ActionKind.WalkingBackwards, 100)
-    attacking = animation.createAnimation(ActionKind.Attacking, 5)
-    idling.addAnimationFrame(assets.image`ReaperIdle1`)
-    idling.addAnimationFrame(assets.image`ReaperIdle2`)
-    idling.addAnimationFrame(assets.image`ReaperIdle3`)
-    idling.addAnimationFrame(assets.image`ReaperIdle4`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack1`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack2`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack3`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack4`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack5`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack6`)
-    attacking.addAnimationFrame(assets.image`ReaperAttack7`)
-    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert1`)
-    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert2`)
-    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert3`)
-    idlingReverse.addAnimationFrame(assets.image`ReaperIdleInvert4`)
-    animation.attachAnimation(reaper, idling)
-    animation.attachAnimation(reaper, idlingReverse)
-    animation.attachAnimation(reaper, attacking)
-}
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Boss, function (sprite, otherSprite) {
+    bossLifeInt += -1
+    RefreshText()
     bossInvulnerable = true
+    animation.runImageAnimation(
+    boss,
+    assets.animation`BossHurtAnim`,
+    100,
+    false
+    )
     if (bossInvulnerable) {
-        animation.setAction(boss, ActionKind.Hurt)
         pause(1000)
         bossInvulnerable = false
     }
-    animation.setAction(boss, ActionKind.Idle)
+    animation.runImageAnimation(
+    boss,
+    assets.animation`BossIdleAnim`,
+    80,
+    true
+    )
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, otherSprite) {
     diamondsCounterInt += 1
@@ -101,27 +141,28 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.diamond, function (sprite, other
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     facingDirection = 2
+    animation.runImageAnimation(
+    reaper,
+    assets.animation`ReaperIdleReverseAnim`,
+    80,
+    true
+    )
 })
-function PortalCreator () {
-    for (let value4 of tiles.getTilesByType(assets.tile`myTile4`)) {
-        portal = sprites.create(assets.image`Portal7`, SpriteKind.Portal)
-        tiles.placeOnTile(portal, value4)
-        tiles.setTileAt(value4, assets.tile`transparency16`)
-        PortalAnimator()
+function RefreshText () {
+    lifeText.setText(": " + lifeInt)
+    diamondsText.setText(": " + diamondsCounterInt)
+    enemiesLeftText.setText(": " + enemiesLeftInt)
+    potionsText.setText(": " + potionsInt)
+    if (areWeInBossArea) {
+        bossLifeText.setText(": " + bossLifeInt)
     }
 }
-function RefreshText () {
-    enemiesLeftText.setText(": " + enemiesLeftInt)
-    diamondsText.setText(": " + diamondsCounterInt)
-    lifeText.setText(": " + lifeInt)
-}
 function BossSpawner () {
-    for (let value of tiles.getTilesByType(assets.tile`myTile7`)) {
+    for (let value5 of tiles.getTilesByType(assets.tile`myTile7`)) {
         boss = sprites.create(assets.image`BossIdle1`, SpriteKind.Boss)
         boss.ay = 500
-        tiles.setTileAt(value, sprites.dungeon.floorLight4)
-        tiles.placeOnTile(boss, value)
-        BossAnimations()
+        tiles.setTileAt(value5, sprites.dungeon.floorLight4)
+        tiles.placeOnTile(boss, value5)
     }
 }
 function LevelSelector () {
@@ -148,19 +189,37 @@ function LevelSelector () {
             }
         })
     } else if (level == 1) {
-        lifeInt = 99
+        lifeInt = 10
+        potionsInt = 5
+        maxPotions = potionsInt
+        maxLife = lifeInt
+        bossLifeInt = 15
         facingDirection = 1
+        areWeInBossArea = false
         scene.setBackgroundColor(1)
         scene.setBackgroundImage(assets.image`GameBG`)
         tiles.setCurrentTilemap(tilemap`level`)
         PlayerController()
         scene.cameraFollowSprite(reaper)
-        createCoins()
+        animation.runImageAnimation(
+        reaper,
+        assets.animation`ReaperIdleAnim`,
+        80,
+        true
+        )
+        DiamondSpawner()
         GhostSpawner()
-        PortalCreator()
+        PortalSpawner()
         ScreenText()
+        PotionsSpawner()
         RefreshText()
         BossSpawner()
+        animation.runImageAnimation(
+        boss,
+        assets.animation`BossIdleAnim`,
+        80,
+        true
+        )
     }
 }
 function PlayerController () {
@@ -168,133 +227,117 @@ function PlayerController () {
     reaper.setScale(0.65, ScaleAnchor.Middle)
     reaper.ay = 500
     controller.moveSprite(reaper, 150, 0)
-    for (let value5 of tiles.getTilesByType(assets.tile`myTile5`)) {
+    for (let value52 of tiles.getTilesByType(assets.tile`myTile5`)) {
         tiles.placeOnRandomTile(reaper, assets.tile`myTile5`)
-        tiles.setTileAt(value5, assets.tile`transparency16`)
+        tiles.setTileAt(value52, assets.tile`transparency16`)
     }
-    PlayerAnimations()
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     facingDirection = 1
+    animation.runImageAnimation(
+    reaper,
+    assets.animation`ReaperIdleAnim`,
+    80,
+    true
+    )
 })
-function CoinAnimation () {
-    diamondIdle = animation.createAnimation(ActionKind.Idle, 100)
-    diamondIdle.addAnimationFrame(assets.image`Diamond1`)
-    diamondIdle.addAnimationFrame(assets.image`Diamond2`)
-    diamondIdle.addAnimationFrame(assets.image`Diamond3`)
-    diamondIdle.addAnimationFrame(assets.image`Diamond4`)
-    animation.attachAnimation(diamondSprite, diamondIdle)
-    animation.setAction(diamondSprite, ActionKind.Idle)
-}
-function BossAnimations () {
-    bossIdle = animation.createAnimation(ActionKind.Idle, 100)
-    animation.attachAnimation(boss, bossIdle)
-    bossIdle.addAnimationFrame(assets.image`BossIdle1`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle2`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle3`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle4`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle5`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle6`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle7`)
-    bossIdle.addAnimationFrame(assets.image`BossIdle8`)
-    bossAttack = animation.createAnimation(ActionKind.Attacking, 100)
-    animation.attachAnimation(boss, bossAttack)
-    bossAttack.addAnimationFrame(assets.image`BossAttack1`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack2`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack3`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack4`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack5`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack6`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack7`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack8`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack9`)
-    bossAttack.addAnimationFrame(assets.image`BossAttack10`)
-    bossHurt = animation.createAnimation(ActionKind.Hurt, 100)
-    animation.attachAnimation(boss, bossHurt)
-    bossHurt.addAnimationFrame(assets.image`BossHurt1`)
-    bossHurt.addAnimationFrame(assets.image`BossHurt2`)
-    bossHurt.addAnimationFrame(assets.image`BossHurt3`)
-    animation.setAction(boss, ActionKind.Idle)
-}
-function GhostAnimations () {
-    ghostIdle = animation.createAnimation(ActionKind.Idle, 100)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle1`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle2`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle3`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle4`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle5`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle6`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle7`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle8`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle9`)
-    ghostIdle.addAnimationFrame(assets.image`GhostIdle10`)
-    animation.attachAnimation(ghost, ghostIdle)
-    animation.setAction(ghost, ActionKind.Idle)
-}
 sprites.onOverlap(SpriteKind.Player, SpriteKind.ghostSpawner, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
     reaper.sayText("FANTASMAA!!!!", 500, false)
     GhostController()
 })
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (level == 1) {
+        if (lifeInt < maxLife && potionsInt > 0) {
+            lifeInt += 1
+            potionsInt += -1
+            RefreshText()
+        }
+        if (lifeInt == maxLife) {
+            reaper.sayText("Vida llena!", 500, false)
+        }
+        if (potionsInt == 0) {
+            reaper.sayText("Sin Pociones!", 500, false)
+        }
+    }
+})
 function ScreenText () {
-    enemiesLeftText = textsprite.create("Test")
+    enemiesLeftText = textsprite.create("")
     enemiesLeftText.setBorder(1, 0, 1)
     enemiesLeftText.setOutline(1, 15)
     enemiesLeftText.setIcon(assets.image`EnemiesIcon`)
     enemiesLeftText.setFlag(SpriteFlag.RelativeToCamera, true)
-    enemiesLeftText.setPosition(130, 11)
-    lifeText = textsprite.create("Test")
+    enemiesLeftText.setPosition(120, 11)
+    lifeText = textsprite.create("")
     lifeText.setBorder(1, 0, 1)
     lifeText.setOutline(1, 15)
     lifeText.setIcon(assets.image`LifeIcon`)
     lifeText.setFlag(SpriteFlag.RelativeToCamera, true)
     lifeText.setPosition(30, 11)
-    diamondsText = textsprite.create("Test")
+    diamondsText = textsprite.create("")
     diamondsText.setBorder(1, 0, 1)
     diamondsText.setOutline(1, 15)
     diamondsText.setIcon(assets.image`DiamondIcon`)
     diamondsText.setFlag(SpriteFlag.RelativeToCamera, true)
     diamondsText.setPosition(80, 11)
-}
-function PortalAnimator () {
-    portalAnim = animation.createAnimation(ActionKind.Walking, 60)
-    portalAnim.addAnimationFrame(assets.image`Portal1`)
-    portalAnim.addAnimationFrame(assets.image`Portal2`)
-    portalAnim.addAnimationFrame(assets.image`Portal3`)
-    portalAnim.addAnimationFrame(assets.image`Portal4`)
-    portalAnim.addAnimationFrame(assets.image`Portal5`)
-    portalAnim.addAnimationFrame(assets.image`Portal6`)
-    portalAnim.addAnimationFrame(assets.image`Portal7`)
-    animation.attachAnimation(portal, portalAnim)
-    animation.setAction(portal, ActionKind.Walking)
-}
-function createCoins () {
-    for (let value6 of tiles.getTilesByType(assets.tile`myTile`)) {
-        diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
-        totalDiamonds += 1
-        diamondSprite.setScale(0.4, ScaleAnchor.Middle)
-        tiles.placeOnTile(diamondSprite, value6)
-        tiles.setTileAt(value6, assets.tile`transparency16`)
-        CoinAnimation()
+    bossLifeText = textsprite.create("")
+    potionsText = textsprite.create("Test")
+    potionsText.setBorder(1, 0, 1)
+    potionsText.setOutline(1, 15)
+    potionsText.setIcon(assets.image`Potion1`)
+    potionsText.setFlag(SpriteFlag.RelativeToCamera, true)
+    potionsText.setPosition(30, 99)
+    if (areWeInBossArea) {
+        bossLifeText = textsprite.create("")
+        bossLifeText.setBorder(1, 0, 1)
+        bossLifeText.setOutline(1, 15)
+        bossLifeText.setIcon(assets.image`BossLifeIcon`)
+        bossLifeText.setFlag(SpriteFlag.RelativeToCamera, true)
+        bossLifeText.setPosition(78, 99)
+        enemiesLeftText.setIcon(assets.image`IconEmpty`)
+        diamondsText.setIcon(assets.image`IconEmpty`)
+        enemiesLeftText = textsprite.create("")
+        diamondsText = textsprite.create("")
     }
 }
 function GhostController () {
     ghost = sprites.create(assets.image`GhostIdle10`, SpriteKind.Enemy)
     ghost.setScale(0.7, ScaleAnchor.Middle)
-    ghost.setPosition(reaper.x + 70, reaper.y - 50)
+    ghost.setPosition(reaper.x + 50, reaper.y - 40)
+    animation.runImageAnimation(
+    ghost,
+    assets.animation`GhostIdleAnim`,
+    100,
+    true
+    )
     if (!(invincible)) {
         ghost.follow(reaper)
     }
-    GhostAnimations()
 }
-function AnimatorController () {
-    if (facingDirection == 1) {
-        animation.setAction(reaper, ActionKind.Idle)
-    }
-    if (facingDirection == 2) {
-        animation.setAction(reaper, ActionKind.WalkingBackwards)
+function DiamondSpawner () {
+    for (let value6 of tiles.getTilesByType(assets.tile`myTile`)) {
+        diamondSprite = sprites.create(assets.image`Diamond1`, SpriteKind.diamond)
+        diamondSprite.setScale(0.4, ScaleAnchor.Middle)
+        totalDiamonds += 1
+        animation.runImageAnimation(
+        diamondSprite,
+        assets.animation`DiamondAnim`,
+        100,
+        true
+        )
+        tiles.placeOnTile(diamondSprite, value6)
+        tiles.setTileAt(value6, assets.tile`transparency16`)
     }
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Potion, function (sprite, otherSprite) {
+    if (potionsInt < maxPotions) {
+        potionsInt += 1
+        sprites.destroy(otherSprite)
+        RefreshText()
+    } else {
+        reaper.sayText("Pociones llenas", 500, false)
+    }
+})
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     enemiesLeftInt += -1
     RefreshText()
@@ -302,10 +345,17 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
 })
 function GhostSpawner () {
     for (let value7 of tiles.getTilesByType(assets.tile`myTile0`)) {
-        ghostSpawnPoint = sprites.create(assets.image`GhostSpawner`, SpriteKind.ghostSpawner)
+        ghostSpawnPoint = sprites.create(assets.image`GhostSpawnPoint2`, SpriteKind.ghostSpawner)
+        ghostSpawnPoint.setScale(0.7, ScaleAnchor.Middle)
         enemiesLeftInt += 1
         tiles.placeOnTile(ghostSpawnPoint, value7)
         tiles.setTileAt(value7, assets.tile`transparency16`)
+        animation.runImageAnimation(
+        ghostSpawnPoint,
+        assets.animation`GhostSpawnPointAnim`,
+        200,
+        true
+        )
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
@@ -331,43 +381,47 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSpr
     }
 })
 let ghostSpawnPoint: Sprite = null
-let invincible = false
-let portalAnim: animation.Animation = null
-let ghost: Sprite = null
-let ghostIdle: animation.Animation = null
-let bossHurt: animation.Animation = null
-let bossAttack: animation.Animation = null
-let bossIdle: animation.Animation = null
 let diamondSprite: Sprite = null
-let diamondIdle: animation.Animation = null
+let invincible = false
+let ghost: Sprite = null
+let maxLife = 0
+let maxPotions = 0
 let mainMenu: miniMenu.MenuSprite = null
+let bossLifeText: TextSprite = null
+let potionsInt = 0
+let potionsText: TextSprite = null
+let enemiesLeftText: TextSprite = null
+let diamondsText: TextSprite = null
 let lifeInt = 0
 let lifeText: TextSprite = null
-let diamondsText: TextSprite = null
-let enemiesLeftText: TextSprite = null
-let portal: Sprite = null
 let boss: Sprite = null
 let bossInvulnerable = false
-let attacking: animation.Animation = null
-let idlingReverse: animation.Animation = null
-let idling: animation.Animation = null
+let bossLifeInt = 0
+let areWeInBossArea = false
 let totalDiamonds = 0
 let diamondsCounterInt = 0
 let enemiesLeftInt = 0
-let reaper: Sprite = null
+let portal: Sprite = null
 let projectile: Sprite = null
+let reaper: Sprite = null
+let canAttack = false
 let facingDirection = 0
+let potion: Sprite = null
 let level = 0
-let imports = sprites.create(assets.image`BossHurt3`, SpriteKind.Enemy)
-level = 1
+music.play(music.stringPlayable("E B C5 A B G A F ", 244), music.PlaybackMode.LoopingInBackground)
+music.setVolume(20)
+level = 0
 LevelSelector()
-game.onUpdate(function () {
-    AnimatorController()
+game.onUpdateInterval(1000, function () {
+    canAttack = true
 })
 game.onUpdateInterval(100, function () {
     if (level == 1) {
         if (lifeInt == 0) {
             game.gameOver(false)
+        }
+        if (bossLifeInt == 0) {
+            game.gameOver(true)
         }
     }
 })
