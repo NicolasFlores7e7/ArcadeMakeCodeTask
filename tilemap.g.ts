@@ -23,8 +23,6 @@ namespace myTiles {
     //% fixedInstance jres blockIdentity=images._tile
     export const tile3 = image.ofBuffer(hex``);
     //% fixedInstance jres blockIdentity=images._tile
-    export const tile11 = image.ofBuffer(hex``);
-    //% fixedInstance jres blockIdentity=images._tile
     export const tile12 = image.ofBuffer(hex``);
     //% fixedInstance jres blockIdentity=images._tile
     export const tile13 = image.ofBuffer(hex``);
@@ -160,39 +158,37 @@ namespace myTiles {
     helpers._registerFactory("tile", function(name: string) {
         switch(helpers.stringTrim(name)) {
             case "transparency16":return transparency16;
-            case "myTile":
+            case "diamond_tile":
             case "tile1":return tile1;
-            case "myTile0":
+            case "ghost_tile":
             case "tile2":return tile2;
-            case "myTile1":
+            case "darkness_tile":
             case "tile4":return tile4;
-            case "column1":
+            case "right_wall_tile":
             case "tile5":return tile5;
-            case "bottom3":
+            case "right_bottom_tile":
             case "tile7":return tile7;
-            case "bottom2":
+            case "center_bottom_tile":
             case "tile6":return tile6;
-            case "woodBottom1":
+            case "letf_wood_bottom_tile":
             case "tile9":return tile9;
-            case "woodBottom2":
+            case "center_wood_bottom_tile":
             case "tile8":return tile8;
-            case "woodBottom3":
+            case "right_wood_bottom_tile":
             case "tile10":return tile10;
-            case "bottom 1":
+            case "left_bottom_tile":
             case "tile3":return tile3;
-            case "myTile2":
-            case "tile11":return tile11;
-            case "myTile3":
+            case "left_wall_tile":
             case "tile12":return tile12;
-            case "myTile4":
+            case "portal_tile":
             case "tile13":return tile13;
-            case "myTile5":
+            case "player_spawn_tile":
             case "tile14":return tile14;
-            case "myTile6":
+            case "player_tp_tile":
             case "tile15":return tile15;
-            case "myTile7":
+            case "boss_spawn_tile":
             case "tile16":return tile16;
-            case "myTile8":
+            case "potion_tile":
             case "tile17":return tile17;
         }
         return null;
