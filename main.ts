@@ -147,6 +147,21 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     true
     )
 })
+function GhostSpawn () {
+    for (let ghost_tile of tiles.getTilesByType(assets.tile`ghost_tile`)) {
+        ghost_spawn_point = sprites.create(assets.image`GhostSpawnPoint1`, SpriteKind.GhostSpawner)
+        ghost_spawn_point.setScale(0.7, ScaleAnchor.Middle)
+        enemies_left_int += 1
+        tiles.placeOnTile(ghost_spawn_point, ghost_tile)
+        tiles.setTileAt(ghost_tile, assets.tile`transparency16`)
+        animation.runImageAnimation(
+        ghost_spawn_point,
+        assets.animation`GhostSpawnPointAnim`,
+        200,
+        true
+        )
+    }
+}
 function RefreshText () {
     life_text.setText(": " + life_int)
     diamond_text.setText(": " + diamonds_int)
@@ -183,7 +198,7 @@ function LevelSelector () {
                 game.showLongText("En un mundo fracturado por el caos, la barrera entre los vivos y los muertos ha sido rota por " + "Abyzark, el Señor del Caos, un demonio despiadado que busca reclamar tanto el inframundo como el reino de los vivos." + "Los fantasmas errantes, almas perdidas liberadas por Abyzark, " + "ahora vagan sin control, sembrando desorden en su desolación." + "" + "\nEntra en escena Nyxa, la encarnación de la Muerte misma. Armada con su guadaña espectral y habilidades místicas" + "Nyxa debe restaurar el equilibrio enviando a los fantasmas errantes de vuelta al inframundo " + "y enfrentándose a Abyzark en un duelo que decidirá el destino de ambos mundos.", DialogLayout.Full)
                 game.reset()
             } else if (selected_index == 2) {
-                game.showLongText("Movimiento : crucetas\\n" + "Atacar: B\\n" + "Saltar: A", DialogLayout.Full)
+                game.showLongText("Movimiento izquierda: Flecha izquierda - Tecla A\\n" + "Movimiento derecha: Flecha derecha - Tecla B\\n" + "Atacar: B - Tecla Enter\\n" + "Saltar: A - Tecla Espacio\\n" + "Pociones : Flecha abajo - Tecla S", DialogLayout.Full)
                 game.reset()
             }
         })
@@ -207,7 +222,7 @@ function LevelSelector () {
         true
         )
         DiamondSpawner()
-        GhostSpawner()
+        GhostSpawn()
         PortalSpawner()
         ScreenText()
         PotionsSpawner()
@@ -343,21 +358,6 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     RefreshText()
     sprites.destroy(otherSprite)
 })
-function GhostSpawner () {
-    for (let ghost_tile of tiles.getTilesByType(assets.tile`ghost_tile`)) {
-        ghost_spawn_point = sprites.create(assets.image`ghost_spawn_point2`, SpriteKind.GhostSpawner)
-        ghost_spawn_point.setScale(0.7, ScaleAnchor.Middle)
-        enemies_left_int += 1
-        tiles.placeOnTile(ghost_spawn_point, ghost_tile)
-        tiles.setTileAt(ghost_tile, assets.tile`transparency16`)
-        animation.runImageAnimation(
-        ghost_spawn_point,
-        assets.animation`ghost_spawn_pointAnim`,
-        200,
-        true
-        )
-    }
-}
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     life_int += -1
     RefreshText()
@@ -380,7 +380,6 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSpr
         invincible = false
     }
 })
-let ghost_spawn_point: Sprite = null
 let diamond_sprite: Sprite = null
 let invincible = false
 let ghost: Sprite = null
@@ -394,6 +393,7 @@ let enemies_left_text: TextSprite = null
 let diamond_text: TextSprite = null
 let life_int = 0
 let life_text: TextSprite = null
+let ghost_spawn_point: Sprite = null
 let boss: Sprite = null
 let boss_invulnerable = false
 let boss_life_int = 0
