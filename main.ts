@@ -13,6 +13,19 @@ namespace SpriteKind {
     export const Boss = SpriteKind.create()
     export const Potion = SpriteKind.create()
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
+    life_int += -1
+    RefreshText()
+    reaper.sayText("AU", 200, false)
+    ghost.setVelocity(800, 0)
+    invincible = true
+    if (invincible) {
+        ghost.follow(null)
+        pause(1000)
+        ghost.follow(sprite)
+        invincible = false
+    }
+})
 function PotionsSpawner () {
     for (let value of tiles.getTilesByType(assets.tile`potion_tile`)) {
         potion = sprites.create(assets.image`Potion1`, SpriteKind.Potion)
@@ -26,55 +39,6 @@ function PotionsSpawner () {
         tiles.setTileAt(value, assets.tile`transparency16`)
     }
 }
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (level == 1) {
-        if (facing_direction == 1) {
-            if (can_attack) {
-                can_attack = false
-                animation.runImageAnimation(
-                reaper,
-                assets.animation`ReaperAttackAnim`,
-                80,
-                false
-                )
-                projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 70, 0)
-                projectile.setScale(0.8, ScaleAnchor.Middle)
-                pause(150)
-                sprites.destroy(projectile)
-                animation.runImageAnimation(
-                reaper,
-                assets.animation`ReaperIdleAnim`,
-                80,
-                true
-                )
-            }
-        } else {
-            if (facing_direction == 2) {
-                if (can_attack) {
-                    can_attack = false
-                    animation.runImageAnimation(
-                    reaper,
-                    assets.animation`ReaperReverseAttackAnim`,
-                    80,
-                    false
-                    )
-                    projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, -50, 0)
-                    projectile.setScale(0.8, ScaleAnchor.Middle)
-                    projectile.setImage(assets.image`ReaperAttack`)
-                    projectile.image.flipX()
-                    pause(150)
-                    sprites.destroy(projectile)
-                    animation.runImageAnimation(
-                    reaper,
-                    assets.animation`ReaperIdleReverseAnim`,
-                    100,
-                    false
-                    )
-                }
-            }
-        }
-    }
-})
 function PortalSpawner () {
     for (let portal_tile of tiles.getTilesByType(assets.tile`portal_tile`)) {
         portal = sprites.create(assets.image`Portal7`, SpriteKind.Portal)
@@ -88,64 +52,18 @@ function PortalSpawner () {
         tiles.setTileAt(portal_tile, assets.tile`transparency16`)
     }
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Diamond, function (sprite, otherSprite) {
+    diamonds_int += 1
+    reaper.sayText("Diamantito!", 500, false)
+    RefreshText()
+    sprites.destroy(otherSprite)
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
         if (reaper.vy == 0) {
             reaper.vy = -225
         }
     }
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.GhostSpawner, function (sprite, otherSprite) {
-    sprites.destroy(otherSprite)
-    reaper.sayText("FANTASMAA!!!!", 500, false)
-    GhostController()
-})
-scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardLava0, function (sprite, location) {
-    game.gameOver(false)
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherSprite) {
-    if (enemies_left_int == 0 && diamonds_int == total_diamonds) {
-        for (let player_tp_tile of tiles.getTilesByType(assets.tile`player_tp_tile`)) {
-            tiles.placeOnRandomTile(reaper, assets.tile`player_tp_tile`)
-            tiles.setTileAt(player_tp_tile, sprites.dungeon.floorLight4)
-            game.showLongText("Tu enemigo final esta en la siguiente arena, DERRÓTALO!", DialogLayout.Bottom)
-        }
-        are_we_on_boss_area = true
-        ScreenText()
-        RefreshText()
-    } else {
-        reaper.sayText("Aún no", 500, false)
-    }
-})
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Boss, function (sprite, otherSprite) {
-    boss_life_int += -1
-    RefreshText()
-    boss_invulnerable = true
-    animation.runImageAnimation(
-    boss,
-    assets.animation`BossHurtAnim`,
-    100,
-    false
-    )
-    if (boss_invulnerable) {
-        pause(1000)
-        boss_invulnerable = false
-    }
-    animation.runImageAnimation(
-    boss,
-    assets.animation`BossIdleAnim`,
-    80,
-    true
-    )
-})
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    facing_direction = 2
-    animation.runImageAnimation(
-    reaper,
-    assets.animation`ReaperIdleReverseAnim`,
-    80,
-    true
-    )
 })
 function GhostSpawn () {
     for (let ghost_tile of tiles.getTilesByType(assets.tile`ghost_tile`)) {
@@ -162,6 +80,15 @@ function GhostSpawn () {
         )
     }
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSprite) {
+    life_int += -1
+    RefreshText()
+    invincible = true
+    if (invincible) {
+        pause(1000)
+        invincible = false
+    }
+})
 function RefreshText () {
     life_text.setText(": " + life_int)
     diamond_text.setText(": " + diamonds_int)
@@ -246,6 +173,44 @@ function PlayerController () {
         tiles.setTileAt(player_spawn_tile, assets.tile`transparency16`)
     }
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.GhostSpawner, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    reaper.sayText("FANTASMAA!!!!", 500, false)
+    GhostController()
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Potion, function (sprite, otherSprite) {
+    if (potions_int < max_potions) {
+        potions_int += 1
+        sprites.destroy(otherSprite)
+        RefreshText()
+    } else {
+        reaper.sayText("Pociones llenas", 500, false)
+    }
+})
+scene.onOverlapTile(SpriteKind.Player, sprites.dungeon.hazardLava0, function (sprite, location) {
+    game.gameOver(false)
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Boss, function (sprite, otherSprite) {
+    boss_life_int += -1
+    RefreshText()
+    boss_invulnerable = true
+    animation.runImageAnimation(
+    boss,
+    assets.animation`BossHurtAnim`,
+    100,
+    false
+    )
+    if (boss_invulnerable) {
+        pause(1000)
+        boss_invulnerable = false
+    }
+    animation.runImageAnimation(
+    boss,
+    assets.animation`BossIdleAnim`,
+    80,
+    true
+    )
+})
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     facing_direction = 1
     animation.runImageAnimation(
@@ -255,24 +220,52 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     true
     )
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Diamond, function (sprite, otherSprite) {
-    diamonds_int += 1
-    reaper.sayText("Diamantito!", 500, false)
-    RefreshText()
-    sprites.destroy(otherSprite)
-})
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (level == 1) {
-        if (life_int < max_life && potions_int > 0) {
-            life_int += 1
-            potions_int += -1
-            RefreshText()
-        }
-        if (life_int == max_life) {
-            reaper.sayText("Vida llena!", 500, false)
-        }
-        if (potions_int == 0) {
-            reaper.sayText("Sin Pociones!", 500, false)
+        if (facing_direction == 1) {
+            if (can_attack) {
+                can_attack = false
+                animation.runImageAnimation(
+                reaper,
+                assets.animation`ReaperAttackAnim`,
+                80,
+                false
+                )
+                projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, 70, 0)
+                projectile.setScale(0.8, ScaleAnchor.Middle)
+                pause(150)
+                sprites.destroy(projectile)
+                animation.runImageAnimation(
+                reaper,
+                assets.animation`ReaperIdleAnim`,
+                80,
+                true
+                )
+            }
+        } else {
+            if (facing_direction == 2) {
+                if (can_attack) {
+                    can_attack = false
+                    animation.runImageAnimation(
+                    reaper,
+                    assets.animation`ReaperReverseAttackAnim`,
+                    80,
+                    false
+                    )
+                    projectile = sprites.createProjectileFromSprite(assets.image`ReaperAttack`, reaper, -50, 0)
+                    projectile.setScale(0.8, ScaleAnchor.Middle)
+                    projectile.setImage(assets.image`ReaperAttack`)
+                    projectile.image.flipX()
+                    pause(150)
+                    sprites.destroy(projectile)
+                    animation.runImageAnimation(
+                    reaper,
+                    assets.animation`ReaperIdleReverseAnim`,
+                    100,
+                    false
+                    )
+                }
+            }
         }
     }
 })
@@ -315,6 +308,20 @@ function ScreenText () {
         diamond_text = textsprite.create("")
     }
 }
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Portal, function (sprite, otherSprite) {
+    if (enemies_left_int == 0 && diamonds_int == total_diamonds) {
+        for (let player_tp_tile of tiles.getTilesByType(assets.tile`player_tp_tile`)) {
+            tiles.placeOnRandomTile(reaper, assets.tile`player_tp_tile`)
+            tiles.setTileAt(player_tp_tile, sprites.dungeon.floorLight4)
+            game.showLongText("Tu enemigo final esta en la siguiente arena, DERRÓTALO!", DialogLayout.Bottom)
+        }
+        are_we_on_boss_area = true
+        ScreenText()
+        RefreshText()
+    } else {
+        reaper.sayText("Aún no", 500, false)
+    }
+})
 function GhostController () {
     ghost = sprites.create(assets.image`GhostIdle10`, SpriteKind.Enemy)
     ghost.setScale(0.7, ScaleAnchor.Middle)
@@ -329,6 +336,35 @@ function GhostController () {
         ghost.follow(reaper)
     }
 }
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    facing_direction = 2
+    animation.runImageAnimation(
+    reaper,
+    assets.animation`ReaperIdleReverseAnim`,
+    80,
+    true
+    )
+})
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (level == 1) {
+        if (life_int < max_life && potions_int > 0) {
+            life_int += 1
+            potions_int += -1
+            RefreshText()
+        }
+        if (life_int == max_life) {
+            reaper.sayText("Vida llena!", 500, false)
+        }
+        if (potions_int == 0) {
+            reaper.sayText("Sin Pociones!", 500, false)
+        }
+    }
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    enemies_left_int += -1
+    RefreshText()
+    sprites.destroy(otherSprite)
+})
 function DiamondSpawner () {
     for (let diamond_tile of tiles.getTilesByType(assets.tile`diamond_tile`)) {
         diamond_sprite = sprites.create(assets.image`Diamond1`, SpriteKind.Diamond)
@@ -344,77 +380,38 @@ function DiamondSpawner () {
         tiles.setTileAt(diamond_tile, assets.tile`transparency16`)
     }
 }
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Potion, function (sprite, otherSprite) {
-    if (potions_int < max_potions) {
-        potions_int += 1
-        sprites.destroy(otherSprite)
-        RefreshText()
-    } else {
-        reaper.sayText("Pociones llenas", 500, false)
-    }
-})
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    enemies_left_int += -1
-    RefreshText()
-    sprites.destroy(otherSprite)
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
-    life_int += -1
-    RefreshText()
-    reaper.sayText("AU", 200, false)
-    ghost.setVelocity(800, 0)
-    invincible = true
-    if (invincible) {
-        ghost.follow(null)
-        pause(1000)
-        ghost.follow(sprite)
-        invincible = false
-    }
-})
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Boss, function (sprite, otherSprite) {
-    life_int += -1
-    RefreshText()
-    invincible = true
-    if (invincible) {
-        pause(1000)
-        invincible = false
-    }
-})
 let diamond_sprite: Sprite = null
-let invincible = false
-let ghost: Sprite = null
+let total_diamonds = 0
+let projectile: Sprite = null
+let can_attack = false
+let boss_invulnerable = false
+let facing_direction = 0
 let max_life = 0
 let max_potions = 0
 let main_menu: miniMenu.MenuSprite = null
+let boss: Sprite = null
+let boss_life_int = 0
 let boss_life_text: TextSprite = null
+let are_we_on_boss_area = false
 let potions_int = 0
 let potions_text: TextSprite = null
 let enemies_left_text: TextSprite = null
 let diamond_text: TextSprite = null
-let life_int = 0
 let life_text: TextSprite = null
-let ghost_spawn_point: Sprite = null
-let boss: Sprite = null
-let boss_invulnerable = false
-let boss_life_int = 0
-let are_we_on_boss_area = false
-let total_diamonds = 0
-let diamonds_int = 0
 let enemies_left_int = 0
+let ghost_spawn_point: Sprite = null
+let diamonds_int = 0
 let portal: Sprite = null
-let projectile: Sprite = null
-let reaper: Sprite = null
-let can_attack = false
-let facing_direction = 0
 let potion: Sprite = null
+let invincible = false
+let ghost: Sprite = null
+let reaper: Sprite = null
+let life_int = 0
 let level = 0
 music.play(music.stringPlayable("E B C5 A B G A F ", 244), music.PlaybackMode.LoopingInBackground)
 music.setVolume(20)
 level = 0
 LevelSelector()
-game.onUpdateInterval(1000, function () {
-    can_attack = true
-})
 game.onUpdateInterval(100, function () {
     if (level == 1) {
         if (life_int == 0) {
@@ -424,4 +421,7 @@ game.onUpdateInterval(100, function () {
             game.gameOver(true)
         }
     }
+})
+game.onUpdateInterval(1000, function () {
+    can_attack = true
 })
